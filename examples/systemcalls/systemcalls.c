@@ -1,4 +1,10 @@
 #include "systemcalls.h"
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+
 
 /**
  * @param cmd the command to execute with system()
@@ -16,6 +22,11 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
+
+    if (system(cmd) == -1)
+    {
+        return false;
+    }
 
     return true;
 }
@@ -59,6 +70,28 @@ bool do_exec(int count, ...)
  *
 */
 
+    pid_t childPid = fork();
+    if (childPid == -1)
+    {
+        return false;
+    }
+    else if (childPid == 0)
+    {
+        if (execv(command[0], command) != -1)
+        {
+			exit(1);
+        }
+    }
+
+    int status = 0;
+    wait(&status);
+    if ( status != 0)
+    {
+        return false;
+    }
+
+
+
     va_end(args);
 
     return true;
@@ -92,6 +125,42 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
+
+    int fd;
+
+    pid_t childPid = fork();
+    if (childPid == -1)
+    {
+        return false;
+    }
+    else if (childPid == 0)
+    {
+        fd = open(outputfile, O_WRONLY | O_TRUNC | O_CREAT, 0644);
+        if (fd == -1)
+        {
+            return false;	
+        }
+        // allocates a new file descriptor (specified) that refers to the same open file description
+		if (dup2(fd, 1) == -1)
+        {
+			return false;
+        }
+
+        if (execv(command[0], command) != -1)
+        {
+			exit(1);
+        }
+    }
+
+    close(fd);
+
+    int status = 0;
+    wait(&status);
+    if ( status != 0)
+    {
+        return false;
+    }
+	
 
     va_end(args);
 
