@@ -49,22 +49,34 @@ fi
 #make clean
 #make
 
-WRITERCMD=$(./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR")
-which writer > /dev/null 2>&1
-if [ $? -eq 0 ]; then
-	WRITERCMD=$(writer "$WRITEDIR/${username}$i.txt" "$WRITESTR")
+echo "Writer Test"
+
+if ! which writer > /dev/null ; then
+# No path
+WRITER_PATH=0
+else
+WRITER_PATH=1
 fi
+
 for i in $( seq 1 $NUMFILES)
 do
 	##./writer.sh "$WRITEDIR/${username}$i.txt" "$WRITESTR"
 	#./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
-	${WRITERCMD}
+
+	if [ $WRITER_PATH -eq 0 ]; then
+		writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	else
+		./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	fi
 done
 
+echo "Finder Test"
+
+if ! which finder.sh > /dev/null ; then
+# No path
+OUTPUTSTRING=$(finder.sh "$WRITEDIR" "$WRITESTR")
+else
 OUTPUTSTRING=$(./finder.sh "$WRITEDIR" "$WRITESTR")
-which finder.sh > /dev/null 2>&1
-if [ $? -eq 0 ]; then
-	OUTPUTSTRING=$(finder.sh "$WRITEDIR" "$WRITESTR")
 fi
 
 #write a file with output of the finder command to /tmp/assignment-4-result.txt
