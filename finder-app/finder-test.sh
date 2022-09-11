@@ -9,6 +9,10 @@ NUMFILES=10
 WRITESTR=AELD_IS_FUN
 WRITEDIR=/tmp/aeld-data
 username=$(cat conf/username.txt)
+if [ -d /etc/finder-app ]
+then
+	username=$(cat /etc/finder-app/conf/username.txt)
+fi
 
 if [ $# -lt 2 ]
 then
@@ -45,13 +49,26 @@ fi
 #make clean
 #make
 
+WRITERCMD=$(./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR")
+which writer > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+	WRITERCMD=$(writer "$WRITEDIR/${username}$i.txt" "$WRITESTR")
+fi
 for i in $( seq 1 $NUMFILES)
 do
-	#./writer.sh "$WRITEDIR/${username}$i.txt" "$WRITESTR"
-	./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	##./writer.sh "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	#./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	${WRITERCMD}
 done
 
 OUTPUTSTRING=$(./finder.sh "$WRITEDIR" "$WRITESTR")
+which finder.sh > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+	OUTPUTSTRING=$(finder.sh "$WRITEDIR" "$WRITESTR")
+fi
+
+#write a file with output of the finder command to /tmp/assignment-4-result.txt
+echo ${OUTPUTSTRING} > /tmp/assignment-4-result.txt
 
 set +e
 echo ${OUTPUTSTRING} | grep "${MATCHSTR}"
