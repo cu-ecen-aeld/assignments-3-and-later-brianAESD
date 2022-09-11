@@ -63,7 +63,7 @@ do
 	##./writer.sh "$WRITEDIR/${username}$i.txt" "$WRITESTR"
 	#./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
 
-	if [ $WRITER_PATH -eq 0 ]; then
+	if [ ! $WRITER_PATH -eq 0 ]; then
 		writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
 	else
 		./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
@@ -72,7 +72,8 @@ done
 
 echo "Finder Test"
 
-if ! which finder.sh > /dev/null ; then
+#if ! which finder.sh > /dev/null ; then
+if  which finder.sh > /dev/null ; then
 # No path
 OUTPUTSTRING=$(finder.sh "$WRITEDIR" "$WRITESTR")
 else
