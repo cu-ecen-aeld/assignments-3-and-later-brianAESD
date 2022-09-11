@@ -8,6 +8,9 @@ endif
 
 CFLAGS= 
 
+all:writer.c	
+	$(CC) -o writer writer.c $(CFLAGS)  
+
 writer:writer.c	
 	$(CC) -o writer writer.c $(CFLAGS)  
 
