@@ -120,7 +120,7 @@ int main(int argc, char **argv)
     }
 
     // -D: run the aesdsocket application as a daemon
-    
+
     if (argc >= 2 && strcmp(argv[1], "-d") == 0)
     {
         // fork
@@ -187,9 +187,9 @@ int main(int argc, char **argv)
         while (connectionDone == 0)
         {
             int receiveResult = 0;
-            const unsigned int receiveDataSize = 100;
-            char receiveData[40000];
-            memset(receiveData, 0, 40000);
+            const unsigned int receiveDataSize = 20000;
+            char receiveData[80000];
+            memset(receiveData, 0, 80000);
 
             // receive
             receiveResult = recv(new_conn_socket, receiveData, receiveDataSize, 0);
@@ -223,8 +223,8 @@ int main(int argc, char **argv)
             // send
             if (receivedByteCount)
             {
-                char sendData[40000];
-                memset(sendData, 0, 40000);
+                char sendData[80000];
+                memset(sendData, 0, 80000);
                 // Seek to the beginning of the file
                 fseek(fp, 0, SEEK_SET);
                 fread(sendData, 1, sendSizeTotal + receivedByteCount, fp);
