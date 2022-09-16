@@ -60,15 +60,27 @@ static void signal_handler(int signal_number)
     if (signal_number == SIGINT || signal_number == SIGTERM)
     {
         caught_sig = true;
-        //printf("Caught signal, exiting\n");
+        printf("Caught signal, exiting\n");
         syslog(LOG_ERR, "Caught signal, exiting");
-        exit_procedure();
+
+        if (addrinfo_res)
+        {
+            freeaddrinfo(addrinfo_res);
+        }
+
+        remove(DATA_FILE);
+
+        if (fp)
+        {
+            fclose(fp);
+        }
+        exit(0);
     }
 }
 
 int main(int argc, char **argv)
 {
-    // printf("Starting aesdsocket\n");
+    printf("Starting aesdsocket\n");
     openlog("aesdsocket", 0, LOG_USER);
 
     // Signal - for SIGTERM and SIGINT signals
@@ -128,12 +140,12 @@ int main(int argc, char **argv)
         pid_t childPid = fork();
         if (childPid == -1)
         {
-            // printf("Failed to fork\n");
+            printf("Failed to fork\n");
             exit(-1);
         }
         else if (childPid)
         {
-            // printf("Fork %d\n", childPid);
+            printf("Fork %d\n", childPid);
             exit(0);
         }
     }
@@ -168,7 +180,7 @@ int main(int argc, char **argv)
             exit_procedure();
         }
         char* conn_ip = inet_ntoa(conn_socketaddr.sin_addr);
-        // printf("Accepted connection from %s\n", conn_ip);
+        printf("Accepted connection from %s\n", conn_ip);
         syslog(LOG_DEBUG, "Accepted connection from %s\n", conn_ip);
 
         // Process data
@@ -176,11 +188,11 @@ int main(int argc, char **argv)
         fp = fopen(DATA_FILE,"a+");
         if (fp == NULL)
         {
-            // printf("Failed: Unable to open file.\n");
+            printf("Failed: Unable to open file.\n");
             syslog(LOG_ERR, "Failed: Unable to open file.\n");
             exit(-1);
         }
-        // printf("Opened: %s\n", DATA_FILE);
+        printf("Opened: %s\n", DATA_FILE);
 
         bool connectionDone = 0;
         unsigned int receivedByteCount = 0;
@@ -197,7 +209,7 @@ int main(int argc, char **argv)
             if (receiveResult == -1)
             {
                 // unsuccessful
-                // printf("Receive is unsuccessful.\n");
+                printf("Receive is unsuccessful.\n");
                 //connection_closed_procedure();
             }
             else if (receiveResult == 0)
@@ -206,14 +218,14 @@ int main(int argc, char **argv)
                 syslog(LOG_DEBUG, "Closed connection from %s\n", conn_ip);
 
                 // Receive is done.
-                // printf("Receive is done.\n");
+                printf("Receive is done.\n");
                 connectionDone = 1;
             }
             else
             {
                 // Received data
                 receivedByteCount += receiveResult;
-                // printf("Received (%d): %s", receiveResult, receiveData);
+                printf("Received (%d): %s", receiveResult, receiveData);
                 bwanTest1++;
                 //fwrite(receiveData, receiveResult, 1, fp);
                 // Seek to the end of the file
@@ -231,10 +243,10 @@ int main(int argc, char **argv)
                 fread(sendData, 1, sendSizeTotal + receivedByteCount, fp);
                 if (sendData[sendSizeTotal + receivedByteCount - 1] != '\n')
                 {
-                    //printf("No newline.\n");
+                    printf("No newline.\n");
                     continue;
                 }
-                // printf("Sending  (%d): %s\n", sendSizeTotal + receivedByteCount, sendData);
+                printf("Sending  (%d): %s\n", sendSizeTotal + receivedByteCount, sendData);
                 int sendResult;
                 sendResult = send(new_conn_socket, sendData, sendSizeTotal + receivedByteCount, 0);
                 sendSizeTotal += receivedByteCount;
@@ -242,7 +254,7 @@ int main(int argc, char **argv)
             }
 
         }
-        //printf("new connection is done.\n");
+        printf("new connection is done.\n");
         close(new_conn_socket);
         //remove(DATA_FILE);
         fclose(fp);
@@ -251,6 +263,6 @@ int main(int argc, char **argv)
     }
 
 
-    // printf("End.\n");
+    printf("End.\n");
     return 0;
 }
