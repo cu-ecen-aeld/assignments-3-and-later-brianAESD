@@ -17,3 +17,4 @@ aesdsocket:aesdsocket.c
 
 clean:
 	rm -f *.raw
+	rm -f aesdsocket
