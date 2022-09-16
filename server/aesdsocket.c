@@ -24,6 +24,7 @@ struct addrinfo hints;
 
 bool caught_sig = false;
 int sockfd = -1;
+int new_conn_socket = 0;
 FILE* fp = 0;
 
 // void connection_closed_procedure(void)
@@ -38,6 +39,7 @@ void exit_procedure(void)
     if (addrinfo_res)
     {
         freeaddrinfo(addrinfo_res);
+        addrinfo_res = 0;
     }
 
     remove(DATA_FILE);
@@ -52,6 +54,12 @@ void exit_procedure(void)
         fclose(fp);
     }
 
+    if (new_conn_socket > 0)
+    {
+        close(new_conn_socket);
+        new_conn_socket = 0;
+    }
+    
     exit(-1);
 }
 
@@ -60,12 +68,13 @@ static void signal_handler(int signal_number)
     if (signal_number == SIGINT || signal_number == SIGTERM)
     {
         caught_sig = true;
-        printf("Caught signal, exiting\n");
-        syslog(LOG_ERR, "Caught signal, exiting");
+        printf("Caught signal, exiting..........................\n");
+        syslog(LOG_ERR, "Caught signal, exiting..........................");
 
         if (addrinfo_res)
         {
             freeaddrinfo(addrinfo_res);
+            addrinfo_res = 0;
         }
 
         remove(DATA_FILE);
@@ -74,12 +83,20 @@ static void signal_handler(int signal_number)
         {
             fclose(fp);
         }
+
+        if (new_conn_socket > 0)
+        {
+            close(new_conn_socket);
+            new_conn_socket = 0;
+        }
         exit(0);
     }
 }
 
 int main(int argc, char **argv)
 {
+    syslog(LOG_DEBUG, "--------------START----------------------");
+    syslog(LOG_DEBUG, "--------------START----------------------");
     printf("Starting aesdsocket\n");
     openlog("aesdsocket", 0, LOG_USER);
 
@@ -150,6 +167,9 @@ int main(int argc, char **argv)
         }
     }
 
+    syslog(LOG_DEBUG, "--------------Listen--------------------");
+    syslog(LOG_DEBUG, "--------------Listen--------------------");
+
     // listen
     status = listen(sockfd, MAX_NUM_CONNECTION);
     if (status == -1)
@@ -159,7 +179,7 @@ int main(int argc, char **argv)
     }
 
     // int returnState = 0;
-    int new_conn_socket = 0;
+    new_conn_socket = 0;
     int bwanTest1 = 0;
     unsigned int sendSizeTotal = 0;
 
@@ -256,6 +276,7 @@ int main(int argc, char **argv)
         }
         printf("new connection is done.\n");
         close(new_conn_socket);
+        new_conn_socket = 0;
         //remove(DATA_FILE);
         fclose(fp);
         fp = 0;
