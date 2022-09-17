@@ -114,13 +114,13 @@ int main(int argc, char **argv)
     printf("Starting aesdsocket\n");
     openlog("aesdsocket", 0, LOG_USER);
 
-    // // Signal - for SIGTERM and SIGINT signals
+    // Signal - for SIGTERM and SIGINT signals
 
-    // struct sigaction new_action;
-    // memset(&new_action, 0, sizeof(struct sigaction));
-    // new_action.sa_handler = signal_handler;
-    // sigaction(SIGTERM, &new_action, NULL);
-    // sigaction(SIGINT, &new_action, NULL);
+    struct sigaction new_action;
+    memset(&new_action, 0, sizeof(struct sigaction));
+    new_action.sa_handler = signal_handler;
+    sigaction(SIGTERM, &new_action, NULL);
+    sigaction(SIGINT, &new_action, NULL);
 
     // Socket
 
@@ -186,7 +186,7 @@ int main(int argc, char **argv)
 
     // Signal - for SIGTERM and SIGINT signals
 
-    struct sigaction new_action;
+    //struct sigaction new_action;
     memset(&new_action, 0, sizeof(struct sigaction));
     new_action.sa_handler = signal_handler;
     sigaction(SIGTERM, &new_action, NULL);
