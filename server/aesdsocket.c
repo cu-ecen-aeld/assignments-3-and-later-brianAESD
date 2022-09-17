@@ -228,9 +228,10 @@ int main(int argc, char **argv)
         while (connectionDone == 0)
         {
             int receiveResult = 0;
-            const unsigned int receiveDataSize = 20000;
-            char receiveData[80000];
-            memset(receiveData, 0, 80000);
+            const unsigned int receiveDataSize = 100;
+            //char receiveData[80000];
+            char* receiveData = malloc(receiveDataSize+1);
+            memset(receiveData, 0, receiveDataSize+1);
 
             // receive
             receiveResult = recv(new_conn_socket, receiveData, receiveDataSize, 0);
@@ -260,24 +261,29 @@ int main(int argc, char **argv)
                 fseek(fp, 0, SEEK_END);
                 fwrite(receiveData, sizeof(char), receiveResult, fp);
             }
+            free(receiveData);
 
             // send
             if (receivedByteCount)
             {
-                char sendData[80000];
-                memset(sendData, 0, 80000);
+                //char sendData[80000];
+                char* sendData = malloc(sendSizeTotal + receivedByteCount+1);
+                //memset(sendData, 0, 80000);
+                memset(sendData, 0, sendSizeTotal + receivedByteCount+1);
                 // Seek to the beginning of the file
                 fseek(fp, 0, SEEK_SET);
                 fread(sendData, 1, sendSizeTotal + receivedByteCount, fp);
                 if (sendData[sendSizeTotal + receivedByteCount - 1] != '\n')
                 {
                     printf("No newline.\n");
+                    free(sendData);
                     continue;
                 }
                 printf("Sending  (%d): %s\n", sendSizeTotal + receivedByteCount, sendData);
                 int sendResult;
                 sendResult = send(new_conn_socket, sendData, sendSizeTotal + receivedByteCount, 0);
                 sendSizeTotal += receivedByteCount;
+                free(sendData);
                 (void) sendResult;
             }
 
