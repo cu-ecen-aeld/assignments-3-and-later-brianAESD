@@ -12,6 +12,8 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <fcntl.h>
+#include <sys/wait.h>
+#include <errno.h>
 
 
 #define PORT_TARGET "9000"
@@ -61,6 +63,18 @@ void exit_procedure(void)
     }
 
     exit(-1);
+}
+
+static void signal_handler_child(int signal_number)
+{
+    if (signal_number == SIGCHLD)
+    {
+        int saved_errno = errno;
+        printf("In signal_handler_child\n");
+        syslog(LOG_ERR, "In signal_handler_child..........................");
+        while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
+        errno = saved_errno;
+    }
 }
 
 static void signal_handler(int signal_number)
@@ -177,6 +191,8 @@ int main(int argc, char **argv)
     new_action.sa_handler = signal_handler;
     sigaction(SIGTERM, &new_action, NULL);
     sigaction(SIGINT, &new_action, NULL);
+    new_action.sa_handler = signal_handler_child;
+    sigaction(SIGCHLD, &new_action, NULL);
 
     // listen
     status = listen(sockfd, MAX_NUM_CONNECTION);
