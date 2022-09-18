@@ -138,7 +138,8 @@ int main(int argc, char **argv)
         {
             printf("TEST Fork %d\n", testPid);
             syslog(LOG_DEBUG, "TEST Fork %d\n", testPid);
-            exit(0);
+            //exit(0);
+            while(1);
         }
     }
     openlog("aesdsocket", 0, LOG_USER);
