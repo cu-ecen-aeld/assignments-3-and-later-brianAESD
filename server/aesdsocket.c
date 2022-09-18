@@ -270,7 +270,7 @@ int main(int argc, char **argv)
             {
                 // Received data
                 receivedByteCount += receiveResult;
-                printf("Received (%d): %s", receiveResult, receiveData);
+                //printf("Received (%d): %s", receiveResult, receiveData);
                 bwanTest1++;
                 //fwrite(receiveData, receiveResult, 1, fp);
                 // Seek to the end of the file
@@ -295,7 +295,7 @@ int main(int argc, char **argv)
                     free(sendData);
                     continue;
                 }
-                printf("Sending  (%d): %s\n", sendSizeTotal + receivedByteCount, sendData);
+                //printf("Sending  (%d): %s\n", sendSizeTotal + receivedByteCount, sendData);
                 int sendResult;
                 sendResult = send(new_conn_socket, sendData, sendSizeTotal + receivedByteCount, 0);
                 sendSizeTotal += receivedByteCount;
