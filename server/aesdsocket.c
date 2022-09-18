@@ -28,9 +28,6 @@ bool caught_sig = false;
 int sockfd = -1;
 int new_conn_socket = 0;
 FILE* fp = 0;
-int getAroundBrokenTest_whichPart = 0;
-
-int main(int argc, char **argv);
 
 // void connection_closed_procedure(void)
 // {
@@ -65,7 +62,7 @@ void exit_procedure(void)
         new_conn_socket = 0;
     }
 
-    exit(0);
+    exit(-1);
 }
 
 static void signal_handler_child(int signal_number)
@@ -106,53 +103,20 @@ static void signal_handler(int signal_number)
             close(new_conn_socket);
             new_conn_socket = 0;
         }
-        syslog(LOG_ERR, "exiting..........................");
-        if (getAroundBrokenTest_whichPart == 1)
-        {
-            syslog(LOG_DEBUG, "Caught signal, 1st part only; stay up............");
-            getAroundBrokenTest_whichPart = 2;
-            main(1,NULL);
-            return;
-        }
         exit(0);
     }
 }
 
 int main(int argc, char **argv)
 {
-    int status = 0;
-    struct sigaction new_action;
-
-    if (getAroundBrokenTest_whichPart == 2)
-    {
-        getAroundBrokenTest_whichPart = 3;
-        // fork
-        pid_t testPid = fork();
-        if (testPid == -1)
-        {
-            printf("Failed to fork\n");
-            syslog(LOG_DEBUG, "TEST Failed to fork");
-            exit(0);
-        }
-        else if (testPid)
-        {
-            printf("TEST Fork %d\n", testPid);
-            syslog(LOG_DEBUG, "TEST Fork %d\n", testPid);
-            //exit(0);
-            while(1);
-        }
-    }
-    openlog("aesdsocket", 0, LOG_USER);
     syslog(LOG_DEBUG, "--------------START----------------------");
     syslog(LOG_DEBUG, "--------------START----------------------");
     printf("Starting aesdsocket\n");
-
-if (getAroundBrokenTest_whichPart == 0)
-{
+    openlog("aesdsocket", 0, LOG_USER);
 
     // Signal - for SIGTERM and SIGINT signals
 
-    //struct sigaction new_action;
+    struct sigaction new_action;
     memset(&new_action, 0, sizeof(struct sigaction));
     new_action.sa_handler = signal_handler;
     sigaction(SIGTERM, &new_action, NULL);
@@ -164,7 +128,7 @@ if (getAroundBrokenTest_whichPart == 0)
     hints.ai_flags = AI_PASSIVE;
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    status = getaddrinfo(NULL, PORT_TARGET, &hints , &addrinfo_res);  // remember to call freeaddrinfo later
+    int status = getaddrinfo(NULL, PORT_TARGET, &hints , &addrinfo_res);  // remember to call freeaddrinfo later
     if (status != 0)
     {
         syslog(LOG_ERR, "Failed getAddrStatus");
@@ -199,13 +163,6 @@ if (getAroundBrokenTest_whichPart == 0)
         addrinfo_res = 0;
     }
 
-}
-else
-{
-    // (void) status;
-    //(void) &new_action;
-}
-
     // -D: run the aesdsocket application as a daemon
 
     if (argc >= 2 && strcmp(argv[1], "-d") == 0)
@@ -215,14 +172,13 @@ else
         if (childPid == -1)
         {
             printf("Failed to fork\n");
-            exit(0);
+            exit(-1);
         }
         else if (childPid)
         {
             printf("Fork %d\n", childPid);
             exit(0);
         }
-        getAroundBrokenTest_whichPart = 1;
     }
 
     syslog(LOG_DEBUG, "--------------Listen--------------------");
@@ -278,7 +234,7 @@ else
         {
             printf("Failed: Unable to open file.\n");
             syslog(LOG_ERR, "Failed: Unable to open file.\n");
-            exit(0);
+            exit(-1);
         }
         printf("Opened: %s\n", DATA_FILE);
 
