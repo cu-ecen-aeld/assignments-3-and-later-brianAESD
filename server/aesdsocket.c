@@ -65,7 +65,7 @@ void exit_procedure(void)
         new_conn_socket = 0;
     }
 
-    exit(-1);
+    exit(0);
 }
 
 static void signal_handler_child(int signal_number)
@@ -214,7 +214,7 @@ else
         if (childPid == -1)
         {
             printf("Failed to fork\n");
-            exit(-1);
+            exit(0);
         }
         else if (childPid)
         {
@@ -277,7 +277,7 @@ else
         {
             printf("Failed: Unable to open file.\n");
             syslog(LOG_ERR, "Failed: Unable to open file.\n");
-            exit(-1);
+            exit(0);
         }
         printf("Opened: %s\n", DATA_FILE);
 
