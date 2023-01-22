@@ -56,6 +56,7 @@ FILE* fp = 0;
 unsigned int sendSizeTotal = 0;
 int bwanTest1 = 0;
 char* conn_ip;
+bool callTimeStampthread = false;
 
 SLIST_HEAD(slisthead, slist_data_s) head;
 
@@ -245,6 +246,25 @@ static void connection_thread(void* thread)
 
         if (newlineFound)
         {
+
+
+            // timestamp thread
+            if (callTimeStampthread == false)
+            {
+                callTimeStampthread = true;
+                int error = pthread_create(&timestamp_threadId,
+                            NULL,//&attr,
+                            (void*) &timestamp_thread, 
+                            NULL);
+                if (error != 0)
+                {
+                    // error handle_error_en(s, "pthread_create");
+                    // TODO
+                    exit(-1);
+                }    
+            }
+
+            
             threadInfo->connection_done = true;
 
             // send
@@ -392,19 +412,6 @@ int main(int argc, char **argv)
         exit(-1);
     }
     if (printf_enabled) printf("Opened: %s\n", DATA_FILE);
-
-    // timestamp thread
-    int error = pthread_create(&timestamp_threadId,
-                NULL,//&attr,
-                (void*) &timestamp_thread, 
-                NULL);
-    if (error != 0)
-    {
-        // error handle_error_en(s, "pthread_create");
-        // TODO
-        exit(-1);
-    }    
-
 
     // int returnState = 0;
     int new_conn_socket = 0;
