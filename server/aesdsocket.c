@@ -196,7 +196,6 @@ static void connection_thread(void* thread)
     syslog(LOG_DEBUG, "Start connection_thread %ld\n", threadInfo->thread_id);
 
 
-
     while (threadInfo->connection_done == 0)
     {
         int receiveResult = 0;
@@ -276,6 +275,7 @@ static void connection_thread(void* thread)
             {
                 byte = fgetc(fp_send);
                 send(threadInfo->conn_socket, &byte, 1, 0);
+                printf("%c",byte);
             }
             fclose(fp_send);
 
