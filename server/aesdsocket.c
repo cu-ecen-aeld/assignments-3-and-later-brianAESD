@@ -270,6 +270,7 @@ static void connection_thread(void* thread)
 
             FILE * fp_send;
             uint8_t byte;
+            printf("send start >>>>>>-------===================\n");
             fp_send = fopen(DATA_FILE, "r");
             while (!feof(fp_send))
             {
@@ -278,6 +279,7 @@ static void connection_thread(void* thread)
                 printf("%c",byte);
             }
             fclose(fp_send);
+            printf("send end ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
 
         }
     }
