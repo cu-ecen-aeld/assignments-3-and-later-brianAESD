@@ -270,15 +270,18 @@ static void connection_thread(void* thread)
 
             FILE * fp_send;
             uint8_t byte;
+            bool isNewlineThere = false;
             printf("send start >>>>>>-------===================\n");
             fp_send = fopen(DATA_FILE, "r");
             while (!feof(fp_send))
             {
                 byte = fgetc(fp_send);
+                if (byte == '\n') isNewlineThere = true;
                 send(threadInfo->conn_socket, &byte, 1, 0);
                 printf("%c",byte);
             }
             fclose(fp_send);
+            if (isNewlineThere) printf("Send isNewlineThere = true <<<<<<<<< ............\n");
             printf("send end ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
 
         }
