@@ -350,17 +350,17 @@ int main(int argc, char **argv)
         }
     }
 
-    // timestamp thread
-    int error = pthread_create(&timestamp_threadId,
-                NULL,//&attr,
-                (void*) &timestamp_thread, 
-                NULL);
-    if (error != 0)
-    {
-        // error handle_error_en(s, "pthread_create");
-        // TODO
-        exit(-1);
-    }    
+    // // timestamp thread
+    // int error = pthread_create(&timestamp_threadId,
+    //             NULL,//&attr,
+    //             (void*) &timestamp_thread, 
+    //             NULL);
+    // if (error != 0)
+    // {
+    //     // error handle_error_en(s, "pthread_create");
+    //     // TODO
+    //     exit(-1);
+    // }    
 
     syslog(LOG_DEBUG, "--------------Listen--------------------");
     syslog(LOG_DEBUG, "--------------Listen--------------------");
@@ -392,6 +392,19 @@ int main(int argc, char **argv)
         exit(-1);
     }
     if (printf_enabled) printf("Opened: %s\n", DATA_FILE);
+
+    // timestamp thread
+    int error = pthread_create(&timestamp_threadId,
+                NULL,//&attr,
+                (void*) &timestamp_thread, 
+                NULL);
+    if (error != 0)
+    {
+        // error handle_error_en(s, "pthread_create");
+        // TODO
+        exit(-1);
+    }    
+
 
     // int returnState = 0;
     int new_conn_socket = 0;
