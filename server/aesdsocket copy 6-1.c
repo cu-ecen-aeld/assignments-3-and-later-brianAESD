@@ -55,6 +55,7 @@ int sockfd = -1;
 FILE* fp = 0;
 unsigned int sendSizeTotal = 0;
 int bwanTest1 = 0;
+unsigned int receivedByteCount = 0;
 char* conn_ip;
 
 SLIST_HEAD(slisthead, slist_data_s) head;
@@ -70,6 +71,7 @@ static void cleaup_slist(void)
     while (!SLIST_EMPTY(&head))
     {
         datap = SLIST_FIRST(&head);
+        //if (printf_enabled) printf("Read2: %d\n", datap->value);
         if (datap->threadInfo && datap->threadInfo->conn_socket > 0)
         {
             close(datap->threadInfo->conn_socket);
@@ -103,6 +105,12 @@ void exit_procedure(void)
     {
         fclose(fp);
     }
+
+    // if (new_conn_socket > 0)
+    // {
+    //     close(new_conn_socket);
+    //     new_conn_socket = 0;
+    // }
 
     cleaup_slist();
     pthread_cancel(timestamp_threadId);
@@ -144,9 +152,16 @@ static void signal_handler(int signal_number)
             fclose(fp);
         }
 
+        // if (new_conn_socket > 0)
+        // {
+        //     close(new_conn_socket);
+        //     new_conn_socket = 0;
+        // }
+
         cleaup_slist();
         pthread_cancel(timestamp_threadId);
         pthread_join(timestamp_threadId, NULL);
+
 
         exit(0);
     }
@@ -171,7 +186,7 @@ static void timestamp_thread(void* thread)
         time( &rawtime );
         info = localtime( &rawtime );
         // printf("Current local time and date: %s", asctime(info));
-        char buffer1[128] = " ";
+        char buffer1[128];
         char buffer2[128] = "timestamp: ";
         strftime(buffer1, sizeof(buffer1), "%a, %d %b %Y %T %z", info);
         buffer1[strlen(buffer1)] = '\n';
@@ -226,7 +241,7 @@ static void connection_thread(void* thread)
         else
         {
             // Received data
-
+            receivedByteCount += receiveResult;
             //if (printf_enabled) printf("Received (%d): %s", receiveResult, receiveData);
             bwanTest1++;
             // Seek to the end of the file
@@ -268,6 +283,9 @@ static void connection_thread(void* thread)
     threadInfo->connection_done = true;
     threadInfo->conn_socket = 0;
     //remove(DATA_FILE);
+
+    //fclose(fp);
+    //fp = 0;
 
     if (printf_enabled) printf("Done with connection_thread %ld\n", threadInfo->thread_id);
     syslog(LOG_DEBUG, "Done with connection_thread %ld\n", threadInfo->thread_id);
@@ -402,6 +420,10 @@ int main(int argc, char **argv)
 
     while(1)
     {
+        // if (new_conn_socket != 0)
+        // {
+        //     if (printf_enabled) printf("new_conn_socket is not 0\n");
+        // }
 
         // accept - accept a connection on a socket
         struct sockaddr_in conn_socketaddr;
@@ -416,6 +438,26 @@ int main(int argc, char **argv)
         if (printf_enabled) printf("Accepted connection from %s\n", conn_ip);
         syslog(LOG_DEBUG, "Accepted connection from %s\n", conn_ip);
 
+        // Process data
+
+        // fp = fopen(DATA_FILE,"a+");
+        // if (fp == NULL)
+        // {
+        //     if (printf_enabled) printf("Failed: Unable to open file.\n");
+        //     syslog(LOG_ERR, "Failed: Unable to open file.\n");
+        //     exit(-1);
+        // }
+        // if (printf_enabled) printf("Opened: %s\n", DATA_FILE);
+
+        //bool connectionDone = 0;
+        receivedByteCount = 0;
+/*
+        datap = malloc(sizeof(slist_data_t));
+        //datap->value = (int) (randshannon() * 1000.);
+        datap->threadInfo = (int) (bwanTcnt++ * 1000.);
+        if (printf_enabled) printf("Insert: %d\n", datap->value);
+        SLIST_INSERT_HEAD(&head, datap, entries);
+*/
 
         // Create connection thread with slist
 
@@ -439,25 +481,28 @@ int main(int argc, char **argv)
             exit(-1);
         }
 
-        // pthread_join.
-        SLIST_FOREACH(datap, &head, entries)
-        {
-            //if (printf_enabled) printf("Read1: %d\n", datap->value);
-            pthread_join(datap->threadInfo->thread_id, NULL);
+    }
 
-            //datap = SLIST_FIRST(&head);
-            //if (printf_enabled) printf("Read2: %d\n", datap->value);
-            //SLIST_REMOVE_HEAD(&head, entries);
-            // free(datap);
-            free(datap->threadInfo);
-            SLIST_REMOVE(&head, datap, slist_data_s, entries);
-
-        }
-
-    }   // while
+    // pthread_join(tid[0], NULL);
+    // pthread_join(tid[1], NULL);
 
     if (printf_enabled) printf("Ending \n");
     syslog(LOG_DEBUG, "Ending \n");
+
+    // pthread_join.
+    SLIST_FOREACH(datap, &head, entries)
+    {
+        //if (printf_enabled) printf("Read1: %d\n", datap->value);
+        pthread_join(datap->threadInfo->thread_id, NULL);
+
+        //datap = SLIST_FIRST(&head);
+        //if (printf_enabled) printf("Read2: %d\n", datap->value);
+        //SLIST_REMOVE_HEAD(&head, entries);
+        // free(datap);
+        free(datap->threadInfo);
+        SLIST_REMOVE(&head, datap, slist_data_s, entries);
+
+    }
     pthread_mutex_destroy(&mutexLock);
     pthread_cancel(timestamp_threadId);
     pthread_join(timestamp_threadId, NULL);

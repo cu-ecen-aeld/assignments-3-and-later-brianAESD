@@ -13,7 +13,7 @@ all:aesdsocket
 default:aesdsocket
 
 aesdsocket:aesdsocket.c	
-	$(CC) -o aesdsocket aesdsocket.c $(CFLAGS)  
+	$(CC) -o aesdsocket aesdsocket.c $(CFLAGS)  -pthread -lrt
 
 clean:
 	rm -f *.raw
