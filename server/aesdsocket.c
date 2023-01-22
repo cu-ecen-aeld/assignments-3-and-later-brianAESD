@@ -269,26 +269,26 @@ static void connection_thread(void* thread)
             // send
 
             FILE * fp_send;
-            uint16_t byteCnt = 0;
             uint8_t byte;
-            bool isNewlineThere = false;
-            printf("send start >>>>>>-------===================\n");
+            // uint16_t byteCnt = 0;
+            // bool isNewlineThere = false;
+            // printf("send start >>>>>>-------===================\n");
             fp_send = fopen(DATA_FILE, "r");
             while (!feof(fp_send))
             {
                 byte = fgetc(fp_send);
-                if (byte == '\n') isNewlineThere = true;
+                // if (byte == '\n') isNewlineThere = true;
                 if (feof(fp_send))
                 {
                     break;  // last byte is bad.
                 }
                 send(threadInfo->conn_socket, &byte, 1, 0);
-                byteCnt++;
-                printf("%c",byte);
+                // byteCnt++;
+                // printf("%c",byte);
             }
             fclose(fp_send);
-            if (isNewlineThere) printf("Send %d isNewlineThere = true <<<<<<<<< ............\n", byteCnt);
-            printf("send end ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
+            // if (isNewlineThere) printf("Send %d isNewlineThere = true <<<<<<<<< ............\n", byteCnt);
+            // printf("send end ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
 
         }
     }
